@@ -37,6 +37,22 @@ public class SessionController(AppDbContext db) : ControllerBase
         }
     }
 
+    [HttpGet("{id}/chairs")]
+    public async Task<IActionResult> GetSessionChairs(int id)
+    {
+        try {
+            List<Session> sessions = await db.Sessions.Where(s => s.MovieId == id).ToListAsync();
+
+            if (sessions.Count == 0) {
+                return Ok(new List<Session>());
+            }
+
+            return Ok(sessions);
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
+    }
+
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, [FromBody] Session session)
     {

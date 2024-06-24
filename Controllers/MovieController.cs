@@ -57,6 +57,22 @@ public class MovieController(AppDbContext db) : ControllerBase
         }
     }
 
+    [HttpGet("{id}/sessions")]
+    public async Task<IActionResult> GetSessions(int id)
+    {
+        try {
+            List<Session> sessions = await db.Sessions.Where(s => s.MovieId == id).ToListAsync();
+
+            if (sessions.Count == 0) {
+                return Ok(new List<Session>());
+            }
+
+            return Ok(sessions);
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
+    }
+
     // TODO: SOMENTE OS ADMINS PODEM ALTERAR FILMES
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, [FromBody] Movie movie)
