@@ -6,7 +6,7 @@ namespace cinema_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MovieController(MovieDB db) : ControllerBase
+public class MovieController(AppDbContext db) : ControllerBase
 {
 
     [HttpGet()]

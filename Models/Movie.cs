@@ -8,8 +8,3 @@ public class Movie
     public string? Sinopsis { get; set; }
     public string? Cover { get; set; }
 }
-
-public class MovieDB(DbContextOptions options) : DbContext(options)
-{
-    public DbSet<Movie>? Movies { get; set; }
-}
