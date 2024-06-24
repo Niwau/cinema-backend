@@ -1,70 +1,103 @@
 using Microsoft.AspNetCore.Mvc;
 using cinema_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace cinema_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MovieController : ControllerBase
+public class MovieController(MovieDB db) : ControllerBase
 {
-    private readonly List<Movie> movies =
-    [
-        new() { Id = 1, Name = "Movie 1", Sinopsis = "Sinopsis 1", Cover = "Cover 1" },
-        new() { Id = 2, Name = "Movie 2", Sinopsis = "Sinopsis 2", Cover = "Cover 2" },
-        new() { Id = 3, Name = "Movie 3", Sinopsis = "Sinopsis 3", Cover = "Cover 3" },
-        new() { Id = 4, Name = "Movie 4", Sinopsis = "Sinopsis 4", Cover = "Cover 4" },
-        new() { Id = 5, Name = "Movie 5", Sinopsis = "Sinopsis 5", Cover = "Cover 5" }
-    ];
 
     [HttpGet()]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        return Ok(movies);
-    }
+        try {
+            List<Movie> movies = await db.Movies.ToListAsync();
 
-    [HttpGet("{id}")]
-    public IActionResult Get(int id)
-    {
-        var movie = movies.Find(movie => movie.Id == id);
-        if (movie == null)
-        {
-            return NotFound();
+            if (movies.Count == 0) {
+                return Ok(new List<Movie>());
+            }
+
+            return Ok(db.Movies.ToList());
+        } catch (Exception e) {
+            return BadRequest(e.Message);
         }
-        return Ok(movie);
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] Movie movie)
+    public async Task<IActionResult> Post([FromBody] Movie movie)
     {
-        movies.Add(movie);
-        return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
+        try
+        {
+            await db.Movies.AddAsync(movie);
+            await db.SaveChangesAsync();
+            return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(int id)
+    {
+        try {
+            Movie movie = await db.Movies.FindAsync(id);
+
+            if (movie == null)
+            {
+                return NotFound();
+            }
+            return Ok(movie);
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] Movie movie)
-    {
-        var index = movies.FindIndex(movie => movie.Id == id);
-        
-        if (index == -1) {
-          return NotFound();
-        }
+    public async Task<IActionResult> Put(int id, [FromBody] Movie movie)
+    {    
+       try {
+            var movieToUpdate = await db.Movies.FindAsync(id);
 
-        movies[index] = movie;
-        
-        return Ok(movies[index]);
+            if (movieToUpdate == null) {
+                return NotFound();
+            }
+
+            movieToUpdate.Name = movie.Name;
+            movieToUpdate.Sinopsis = movie.Sinopsis;
+            movieToUpdate.Cover = movie.Cover;
+
+            db.Movies.Update(movieToUpdate);
+            await db.SaveChangesAsync();
+            return Ok(movie);
+        }
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var movie = movies.Find(movie => movie.Id == id);
+        try {
+            var movie = await db.Movies.FindAsync(id);
 
-        if (movie == null) {
-          return NotFound();
+            if (movie == null) {
+                return NotFound();
+            }
+            
+            db.Movies.Remove(movie);
+            await db.SaveChangesAsync();
+
+            return Ok(movie);
         }
-          
-        movies.Remove(movie);
-        return Ok(movie);
-    }
-
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
+    } 
 }

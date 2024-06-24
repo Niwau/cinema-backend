@@ -1,11 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using cinema_backend.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Configuração do Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<MovieDB>(options => options.UseInMemoryDatabase("items"));
+
 
 var app = builder.Build();
 
