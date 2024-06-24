@@ -1,55 +1,84 @@
 using Microsoft.AspNetCore.Mvc;
 using cinema_backend.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace cinema_backend.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class SessionController : ControllerBase
+public class SessionController(AppDbContext db) : ControllerBase
 {
-    private readonly List<Session> sessions =
-    [
-        new() { Id = 1, StartsAt = new DateTime(2022, 1, 1, 10, 0, 0), EndsAt = new DateTime(2022, 1, 1, 12, 0, 0), MovieId = 1, RoomId = 1 },
-    ];
 
     [HttpGet()]
-    public IActionResult Get()
+    public async Task<IActionResult> Get()
     {
-        return Ok(sessions);
+        try {
+            List<Session> sessions = await db.Sessions.ToListAsync();
+
+            if (sessions.Count == 0) {
+                return Ok(new List<Session>());
+            }
+
+            return Ok(db.Sessions.ToList());
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPost]
-    public IActionResult Post([FromBody] Session session)
+    public async Task<IActionResult> Post([FromBody] Session session)
     {
-        sessions.Add(session);
-        return CreatedAtAction(nameof(Get), new { id = session.Id }, session);
+        try {
+            await db.Sessions.AddAsync(session);
+            await db.SaveChangesAsync();
+            return CreatedAtAction(nameof(Get), new { id = session.Id }, session);
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] Session session)
+    public async Task<IActionResult> Put(int id, [FromBody] Session session)
     {
-        var index = sessions.FindIndex(movie => movie.Id == id);
-        
-        if (index == -1) {
-          return NotFound();
-        }
+        try {
+            var sessionToUpdate = await db.Sessions.FindAsync(id);
 
-        sessions[index] = session;
+            if (sessionToUpdate == null) {
+                return NotFound();
+            }
+
+            sessionToUpdate.MovieId = session.MovieId;
+            sessionToUpdate.RoomId = session.RoomId;
+            sessionToUpdate.StartsAt = session.StartsAt;
+            sessionToUpdate.EndsAt = session.EndsAt;
         
-        return Ok(sessions[index]);
+            await db.SaveChangesAsync();
+            return Ok(sessionToUpdate);
+
+        } catch (Exception e) {
+            return BadRequest(e.Message);
+        }
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> Delete(int id)
     {
-        var session = sessions.Find(session => session.Id == id);
+        try {
+            var session = await db.Sessions.FindAsync(id);
 
-        if (session == null) {
-          return NotFound();
+            if (session == null) {
+                return NotFound();
+            }
+            
+            db.Sessions.Remove(session);
+            await db.SaveChangesAsync();
+
+            return Ok(session);
         }
-          
-        sessions.Remove(session);
-        return Ok(session);
+        catch (Exception e)
+        {
+            return BadRequest(e.Message);
+        }
     }
 
 }

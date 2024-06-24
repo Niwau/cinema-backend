@@ -11,9 +11,8 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // Configuração do banco de dados
-var connectionString = builder.Configuration.GetConnectionString("Pizzas") ?? "Data Source=Pizzas.db";
+var connectionString = builder.Configuration.GetConnectionString("Cinema") ?? "Data Source=Cinema.db";
 builder.Services.AddSqlite<AppDbContext>(connectionString);
-
 
 var app = builder.Build();
 

@@ -25,6 +25,7 @@ public class MovieController(AppDbContext db) : ControllerBase
         }
     }
 
+    // TODO: SOMENTE OS ADMINS PODEM CRIAR FILMES
     [HttpPost]
     public async Task<IActionResult> Post([FromBody] Movie movie)
     {
@@ -56,6 +57,7 @@ public class MovieController(AppDbContext db) : ControllerBase
         }
     }
 
+    // TODO: SOMENTE OS ADMINS PODEM ALTERAR FILMES
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, [FromBody] Movie movie)
     {    
@@ -80,6 +82,7 @@ public class MovieController(AppDbContext db) : ControllerBase
         }
     }
 
+    // TODO: SOMENTE OS ADMINS PODEM DELETAR FILMES
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
     {
