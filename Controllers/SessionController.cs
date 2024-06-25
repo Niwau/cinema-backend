@@ -41,13 +41,15 @@ public class SessionController(AppDbContext db) : ControllerBase
     public async Task<IActionResult> GetSessionChairs(int id)
     {
         try {
-            List<Session> sessions = await db.Sessions.Where(s => s.MovieId == id).ToListAsync();
+            var session = await db.Sessions.FindAsync(id);
 
-            if (sessions.Count == 0) {
-                return Ok(new List<Session>());
+            if (session == null) {
+                return NotFound();
             }
 
-            return Ok(sessions);
+            var chairs = await db.Chairs.Where(c => c.RoomId == session.RoomId).ToListAsync();
+
+            return Ok(chairs);
         } catch (Exception e) {
             return BadRequest(e.Message);
         }
