@@ -31,7 +31,10 @@ public class TicketController(AppDbContext db) : ControllerBase
         try {
             await db.Tickets.AddAsync(ticket);
             await db.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = ticket.Id }, ticket);
+
+            var response = new TicketResponse(ticket);
+
+            return CreatedAtAction(nameof(Get), new { id = ticket.Id }, response);
         } catch (Exception e) {
             return BadRequest(e.Message);
         }
