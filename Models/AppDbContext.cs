@@ -9,4 +9,5 @@ public class AppDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Chair>? Chairs { get; set; }
     public DbSet<Admin>? Admins { get; set; }
     public DbSet<Room>? Rooms { get; set; }
+    public DbSet<Ticket>? Tickets { get; set; }
 }
